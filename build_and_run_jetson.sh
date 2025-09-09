@@ -82,11 +82,21 @@ rosdep install --from-paths src --ignore-src -r -y
 # 젯슨 메모리 최적화 빌드
 echo "🔨 메모리 최적화 빌드 실행 중..."
 export MAKEFLAGS="-j2"  # 젯슨 나노는 메모리 제한으로 병렬 빌드 제한
+
+# 이전 빌드 결과가 있으면 정리 (선택적)
+if [ -d "build" ] || [ -d "install" ] || [ -d "log" ]; then
+    echo "🧹 이전 빌드 결과 정리 중..."
+    rm -rf build install log
+fi
+
+# 강력한 빌드 옵션으로 빌드
+echo "🚀 colcon build 시작..."
 colcon build --symlink-install \
     --cmake-args \
     -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
-    --parallel-workers 2
+    --parallel-workers 2 \
+    --executor sequential
 
 # 빌드 결과 확인
 if [ $? -eq 0 ]; then
