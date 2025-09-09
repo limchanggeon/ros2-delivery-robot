@@ -21,10 +21,6 @@ setup(
     ],
     install_requires=[
         'setuptools',
-        'requests>=2.25.0',      # HTTP API 요청용
-        'numpy>=1.21.0',         # NumPy
-        'geopy>=2.2.0',          # GPS 좌표 처리
-        'folium>=0.12.0',        # 지도 시각화 (선택사항)
     ],
     zip_safe=True,
     maintainer='배달로봇팀',
@@ -36,10 +32,6 @@ setup(
         'console_scripts': [
             # 임무 제어 노드
             'mission_control_node = delivery_robot_mission.mission_control_node:main',
-            # 지도 API 인터페이스 노드
-            'map_api_interface_node = delivery_robot_mission.map_api_interface_node:main',
-            # 웨이포인트 팔로워 노드
-            'waypoint_follower_node = delivery_robot_mission.waypoint_follower_node:main',
             # 시스템 모니터 노드
             'system_monitor_node = delivery_robot_mission.system_monitor_node:main',
         ],

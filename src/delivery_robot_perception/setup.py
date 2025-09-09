@@ -27,13 +27,6 @@ setup(
     ],
     install_requires=[
         'setuptools',
-        'ultralytics>=8.0.0',  # YOLOv8
-        'torch>=1.9.0',        # PyTorch
-        'torchvision>=0.10.0', # TorchVision
-        'opencv-python>=4.5.0', # OpenCV
-        'numpy>=1.21.0',       # NumPy
-        'Pillow>=8.0.0',       # PIL
-        'requests>=2.25.0',    # HTTP 요청용
     ],
     zip_safe=True,
     maintainer='배달로봇팀',
@@ -45,12 +38,8 @@ setup(
         'console_scripts': [
             # YOLOv8 추론 노드
             'yolo_inference_node = delivery_robot_perception.yolo_inference_node:main',
-            # 카메라 드라이버 노드
+            # 카메라 드라이버 노드  
             'camera_driver_node = delivery_robot_perception.camera_driver_node:main',
-            # 객체 추적 노드 (선택사항)
-            'object_tracker_node = delivery_robot_perception.object_tracker_node:main',
-            # 인식 관리자 노드
-            'perception_manager_node = delivery_robot_perception.perception_manager_node:main',
         ],
     },
     classifiers=[

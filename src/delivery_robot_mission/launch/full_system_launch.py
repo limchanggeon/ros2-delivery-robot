@@ -59,8 +59,8 @@ def generate_launch_description():
     
     declare_rviz_config = DeclareLaunchArgument(
         'rviz_config',
-        default_value='',  # RViz 기본 설정 사용
-        description='RViz 설정 파일 경로'
+        default_value='',
+        description='RViz 설정 파일 경로 (빈 값이면 기본 설정 사용)'
     )
     
     declare_use_rviz = DeclareLaunchArgument(
@@ -175,7 +175,7 @@ def generate_launch_description():
         )
     ])
     
-    # 7. 하드웨어 인터페이스 (ros2_control) - 선택적 실행
+    # 7. 하드웨어 인터페이스 (ros2_control) - 젯슨 환경에서 선택적 실행
     # control_group = GroupAction([
     #     IncludeLaunchDescription(
     #         PythonLaunchDescriptionSource([
@@ -188,7 +188,7 @@ def generate_launch_description():
     #     )
     # ])
     
-    # 8. RViz 시각화 (기본 설정 사용)
+    # 8. RViz 시각화 (젯슨에서는 선택적, 헤드리스 모드 지원)
     rviz_node = Node(
         package='rviz2',
         executable='rviz2',
@@ -223,7 +223,7 @@ def generate_launch_description():
         
         # 시스템 구성 요소들 (순서 중요)
         robot_description_group,      # 1. 로봇 모델
-        # control_group,               # 2. 하드웨어 제어 (선택적)
+        # control_group,               # 2. 하드웨어 제어 (젯슨에서 선택적)
         localization_group,          # 3. 위치 추정
         navigation_group,            # 4. 내비게이션
         perception_group,            # 5. 인식

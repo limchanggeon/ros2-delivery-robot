@@ -21,12 +21,6 @@ setup(
     ],
     install_requires=[
         'setuptools',
-        'opencv-python>=4.5.0',  # OpenCV
-        'numpy>=1.21.0',         # NumPy
-        'requests>=2.25.0',      # HTTP 요청용
-        'cryptography>=3.4.0',   # 암호화
-        'qrcode>=7.0.0',         # QR 코드 생성 (선택사항)
-        'pyzbar>=0.1.8',         # QR 코드 디코딩 (대안)
     ],
     zip_safe=True,
     maintainer='배달로봇팀',
@@ -38,12 +32,6 @@ setup(
         'console_scripts': [
             # QR 코드 인증 노드
             'authentication_node = delivery_robot_security.authentication_node:main',
-            # QR 코드 리더 노드
-            'qr_reader_node = delivery_robot_security.qr_reader_node:main',
-            # 도어 제어 노드
-            'door_control_node = delivery_robot_security.door_control_node:main',
-            # 보안 관리자 노드
-            'security_manager_node = delivery_robot_security.security_manager_node:main',
         ],
     },
     classifiers=[
