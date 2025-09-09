@@ -16,23 +16,33 @@ python3 -m pip install --upgrade pip
 
 # 메모리 효율적 설치를 위한 함수
 install_with_retry() {
-    local package=$1
+    local package_name=$1
+    shift  # 첫 번째 인자 제거
+    local pip_args="$@"  # 나머지 모든 인자들
     local max_retries=3
     local retry=0
     
     while [ $retry -lt $max_retries ]; do
-        echo "설치 시도 ($((retry+1))/$max_retries): $package"
-        if python3 -m pip install --no-cache-dir --user "$package"; then
-            echo "✅ $package 설치 성공"
-            return 0
+        echo "설치 시도 ($((retry+1))/$max_retries): $package_name"
+        if [ -n "$pip_args" ]; then
+            # 추가 pip 인자가 있는 경우
+            if python3 -m pip install --no-cache-dir --user $pip_args; then
+                echo "✅ $package_name 설치 성공"
+                return 0
+            fi
         else
-            echo "❌ $package 설치 실패, 재시도 중..."
-            retry=$((retry+1))
-            sleep 2
+            # 단순 패키지 설치
+            if python3 -m pip install --no-cache-dir --user "$package_name"; then
+                echo "✅ $package_name 설치 성공"
+                return 0
+            fi
         fi
+        echo "❌ $package_name 설치 실패, 재시도 중..."
+        retry=$((retry+1))
+        sleep 2
     done
     
-    echo "❌ $package 설치 최종 실패"
+    echo "❌ $package_name 설치 최종 실패"
     return 1
 }
 
@@ -51,13 +61,13 @@ if [ -f "/proc/device-tree/model" ] && grep -qi "jetson" /proc/device-tree/model
         echo "젯슨용 PyTorch wheel 다운로드 중..."
         wget -q https://developer.download.nvidia.com/compute/redist/jp/v50/pytorch/torch-2.0.0+nv23.05-cp38-cp38-linux_aarch64.whl
     fi
-    install_with_retry "$TORCH_WHEEL"
+    install_with_retry "젯슨용 PyTorch" "$TORCH_WHEEL"
     
     # torchvision 설치 (젯슨 호환)
     install_with_retry "torchvision==0.15.1"
 else
     echo "일반 시스템 - CPU PyTorch 설치"
-    install_with_retry "torch torchvision --index-url https://download.pytorch.org/whl/cpu"
+    install_with_retry "CPU PyTorch" torch torchvision --index-url https://download.pytorch.org/whl/cpu
 fi
 
 # YOLOv8 및 관련 패키지
