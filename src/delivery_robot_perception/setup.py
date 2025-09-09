@@ -12,9 +12,10 @@ setup(
         ('share/ament_index/resource_index/packages',
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
-        # 런치 파일
-        (os.path.join('share', package_name, 'launch'), 
-         glob('launch/*.launch.py')),
+        # 런치 파일 - 명시적 설치
+        (os.path.join('share', package_name, 'launch'), [
+            'launch/perception.launch.py'
+        ]),
         # 설정 파일
         (os.path.join('share', package_name, 'config'), 
          glob('config/*.yaml')),

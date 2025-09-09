@@ -101,6 +101,47 @@ colcon build --symlink-install \
 # 빌드 결과 확인
 if [ $? -eq 0 ]; then
     echo "✅ 빌드 성공!"
+    
+    # Launch 파일 설치 검증 및 강제 복사
+    echo ""
+    echo "🔍 Launch 파일 설치 검증 중..."
+    
+    missing_launch_files=0
+    packages=("delivery_robot_mission" "delivery_robot_perception" "delivery_robot_security")
+    
+    for pkg in "${packages[@]}"; do
+        src_launch_dir="src/$pkg/launch"
+        install_launch_dir="install/$pkg/share/$pkg/launch"
+        
+        if [ -d "$src_launch_dir" ]; then
+            echo "📦 $pkg 패키지 Launch 파일 확인..."
+            
+            if [ ! -d "$install_launch_dir" ]; then
+                echo "  ❌ 설치 디렉토리 없음, 생성 중..."
+                mkdir -p "$install_launch_dir"
+                missing_launch_files=1
+            fi
+            
+            # 각 launch 파일 확인 및 복사
+            for launch_file in "$src_launch_dir"/*.launch.py; do
+                if [ -f "$launch_file" ]; then
+                    filename=$(basename "$launch_file")
+                    if [ ! -f "$install_launch_dir/$filename" ]; then
+                        echo "  🔧 수동 복사: $filename"
+                        cp "$launch_file" "$install_launch_dir/"
+                        missing_launch_files=1
+                    else
+                        echo "  ✅ $filename 설치됨"
+                    fi
+                fi
+            done
+        fi
+    done
+    
+    if [ $missing_launch_files -eq 1 ]; then
+        echo "⚠️ 일부 Launch 파일이 수동으로 복사되었습니다."
+    fi
+    
     echo ""
     echo "========================================="
     echo "🚀 젯슨 오린 나노 실행 가이드"
