@@ -41,9 +41,24 @@ echo "🔧 기본 패키지 설치 중..."
 install_with_retry "numpy"
 install_with_retry "opencv-python"
 
-# PyTorch 설치 (CPU 버전, 더 가벼움)
+# PyTorch 설치 (젯슨용 CUDA 버전)
 echo "🤖 PyTorch 설치 중..."
-install_with_retry "torch torchvision --index-url https://download.pytorch.org/whl/cpu"
+if [ -f "/proc/device-tree/model" ] && grep -qi "jetson" /proc/device-tree/model 2>/dev/null; then
+    echo "젯슨 디바이스 감지됨 - CUDA 지원 PyTorch 설치"
+    # 젯슨용 PyTorch wheel 다운로드 및 설치
+    TORCH_WHEEL="torch-2.0.0+nv23.05-cp38-cp38-linux_aarch64.whl"
+    if [ ! -f "$TORCH_WHEEL" ]; then
+        echo "젯슨용 PyTorch wheel 다운로드 중..."
+        wget -q https://developer.download.nvidia.com/compute/redist/jp/v50/pytorch/torch-2.0.0+nv23.05-cp38-cp38-linux_aarch64.whl
+    fi
+    install_with_retry "$TORCH_WHEEL"
+    
+    # torchvision 설치 (젯슨 호환)
+    install_with_retry "torchvision==0.15.1"
+else
+    echo "일반 시스템 - CPU PyTorch 설치"
+    install_with_retry "torch torchvision --index-url https://download.pytorch.org/whl/cpu"
+fi
 
 # YOLOv8 및 관련 패키지
 echo "👁️ YOLOv8 및 컴퓨터 비전 패키지 설치 중..."

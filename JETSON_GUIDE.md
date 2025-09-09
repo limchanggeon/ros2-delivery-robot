@@ -113,11 +113,15 @@ sudo mkswap /swapfile
 sudo swapon /swapfile
 ```
 
-#### 2. PyTorch 설치 문제
+#### 2. PyTorch CUDA 설치 문제
 ```bash
-# 젯슨용 PyTorch 설치
-wget https://nvidia.box.com/shared/static/fjtbno0vpo676a25cgvuqc1wty0fkkg6.whl -O torch-1.10.0-cp38-cp38-linux_aarch64.whl
-pip3 install torch-1.10.0-cp38-cp38-linux_aarch64.whl
+# 젯슨 오린 나노용 PyTorch CUDA 설치 (JetPack 5.x)
+wget https://developer.download.nvidia.com/compute/redist/jp/v50/pytorch/torch-2.0.0+nv23.05-cp38-cp38-linux_aarch64.whl
+pip3 install torch-2.0.0+nv23.05-cp38-cp38-linux_aarch64.whl
+pip3 install torchvision==0.15.1
+
+# CUDA 지원 확인
+python3 -c "import torch; print(f'PyTorch {torch.__version__} - CUDA: {torch.cuda.is_available()}')"
 ```
 
 #### 3. 카메라 인식 문제

@@ -59,13 +59,16 @@ echo "🐍 Python 의존성 설치 중 (젯슨 최적화)..."
 chmod +x install_python_deps.sh
 ./install_python_deps.sh
 
-# 젯슨 전용 PyTorch 설치 (선택적)
-echo "🤖 젯슨용 PyTorch 설치 확인 중..."
-if ! python3 -c "import torch" 2>/dev/null; then
-    echo "📥 젯슨용 PyTorch 설치 안내:"
-    echo "다음 명령으로 젯슨용 PyTorch를 설치하세요:"
-    echo "wget https://nvidia.box.com/shared/static/fjtbno0vpo676a25cgvuqc1wty0fkkg6.whl -O torch-1.10.0-cp38-cp38-linux_aarch64.whl"
-    echo "pip3 install torch-1.10.0-cp38-cp38-linux_aarch64.whl"
+# 젯슨 전용 PyTorch CUDA 설치 확인
+echo "🤖 젯슨용 PyTorch CUDA 설치 확인 중..."
+if python3 -c "import torch; print(f'PyTorch {torch.__version__} - CUDA available: {torch.cuda.is_available()}')" 2>/dev/null; then
+    echo "✅ PyTorch 이미 설치됨"
+else
+    echo "❌ PyTorch가 설치되지 않았거나 CUDA를 지원하지 않습니다."
+    echo "install_python_deps.sh 스크립트가 젯슨용 CUDA PyTorch를 자동으로 설치했어야 합니다."
+    echo "수동 설치가 필요한 경우:"
+    echo "wget https://developer.download.nvidia.com/compute/redist/jp/v50/pytorch/torch-2.0.0+nv23.05-cp38-cp38-linux_aarch64.whl"
+    echo "pip3 install torch-2.0.0+nv23.05-cp38-cp38-linux_aarch64.whl"
 fi
 
 # rosdep 초기화 및 의존성 설치
