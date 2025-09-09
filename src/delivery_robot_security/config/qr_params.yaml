@@ -1,0 +1,42 @@
+# QR Code Authentication Configuration
+# QR 코드 인증 및 보안 시스템 설정
+
+authentication_node:
+  ros__parameters:
+    # 도어 제어 설정
+    door_open_time: 10.0          # 도어 열림 시간 (초)
+    qr_timeout: 30.0              # QR 코드 대기 시간 (초)
+    door_servo_pin: 18            # GPIO 핀 번호
+    door_open_angle: 90           # 도어 열림 각도
+    door_close_angle: 0           # 도어 닫힘 각도
+    
+    # 서버 검증 설정
+    enable_server_validation: true
+    server_url: "http://localhost:8080/api/validate_qr"
+    
+    # 보안 설정
+    encryption_key: ""            # 암호화 키 (환경변수에서 로드)
+    max_auth_attempts: 3          # 최대 인증 시도 횟수
+    
+qr_reader_node:
+  ros__parameters:
+    # QR 코드 스캔 설정
+    camera_topic: "/camera/image_raw"
+    qr_topic: "/qr/detected"
+    scan_frequency: 10.0          # 스캔 주파수 (Hz)
+    
+    # 이미지 처리 설정
+    image_scale: 1.0              # 이미지 스케일링
+    blur_threshold: 100           # 블러 임계값
+    
+door_control_node:
+  ros__parameters:
+    # GPIO 설정
+    servo_pin: 18                 # 서보 모터 핀
+    led_pin: 24                   # LED 인디케이터 핀
+    buzzer_pin: 25                # 부저 핀
+    
+    # 서보 설정
+    servo_min_pulse: 500          # 최소 펄스 폭 (μs)
+    servo_max_pulse: 2500         # 최대 펄스 폭 (μs)
+    servo_frequency: 50           # PWM 주파수 (Hz)

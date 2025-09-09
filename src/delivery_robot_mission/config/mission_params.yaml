@@ -1,0 +1,65 @@
+# Mission Control Configuration
+# 임무 관리 및 API 연동 설정
+
+mission_control_node:
+  ros__parameters:
+    # API 설정
+    kakao_api_key: ""             # 카카오맵 API 키 (환경변수에서 로드)
+    map_api_timeout: 10.0         # API 요청 타임아웃 (초)
+    
+    # 홈 위치 설정
+    home_position_x: 0.0          # 홈 X 좌표
+    home_position_y: 0.0          # 홈 Y 좌표
+    home_position_yaw: 0.0        # 홈 방향 (라디안)
+    
+    # 프레임 설정
+    map_frame: "map"
+    base_frame: "base_link"
+    
+    # 내비게이션 설정
+    waypoint_tolerance: 2.0       # 웨이포인트 허용 오차 (m)
+    max_linear_velocity: 0.5      # 최대 선속도 (m/s)
+    max_angular_velocity: 1.0     # 최대 각속도 (rad/s)
+    
+    # 임무 설정
+    delivery_timeout: 1800.0      # 배송 타임아웃 (초)
+    retry_attempts: 3             # 재시도 횟수
+    
+map_api_interface_node:
+  ros__parameters:
+    # 카카오맵 API 설정
+    api_base_url: "https://dapi.kakao.com"
+    directions_endpoint: "/v2/local/search/address"
+    geocoding_endpoint: "/v2/local/geo/coord2address"
+    
+    # 경로 설정
+    route_optimization: true      # 경로 최적화 활성화
+    avoid_tolls: false           # 톨게이트 회피
+    avoid_traffic: true          # 교통체증 회피
+    
+    # 캐싱 설정
+    enable_cache: true           # 결과 캐싱 활성화
+    cache_expiry: 3600           # 캐시 만료 시간 (초)
+    
+waypoint_follower_node:
+  ros__parameters:
+    # 웨이포인트 추종 설정
+    goal_tolerance: 1.0          # 목표 허용 오차 (m)
+    waypoint_timeout: 300.0      # 웨이포인트 타임아웃 (초)
+    
+    # 속도 제어
+    approach_velocity: 0.3       # 접근 속도 (m/s)
+    normal_velocity: 0.5         # 일반 속도 (m/s)
+    
+system_monitor_node:
+  ros__parameters:
+    # 모니터링 주기
+    monitor_frequency: 1.0       # 모니터링 주파수 (Hz)
+    
+    # 시스템 상태 체크
+    check_topics: ["/camera/image_raw", "/scan", "/imu/data", "/gps/fix"]
+    topic_timeout: 5.0           # 토픽 타임아웃 (초)
+    
+    # 로그 설정
+    log_level: "INFO"            # 로그 레벨
+    enable_diagnostics: true     # 진단 활성화

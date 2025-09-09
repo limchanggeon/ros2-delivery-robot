@@ -1,0 +1,49 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>delivery_robot_security</name>
+  <version>1.0.0</version>
+  <description>배달 로봇용 보안 시스템 - QR 코드 인증, 도어 제어, 접근 관리</description>
+  
+  <maintainer email="robotics.team@university.ac.kr">배달로봇팀</maintainer>
+  <license>MIT</license>
+  
+  <url type="website">https://github.com/delivery-robot/delivery_robot_security</url>
+  <url type="bugtracker">https://github.com/delivery-robot/delivery_robot_security/issues</url>
+  <url type="repository">https://github.com/delivery-robot/delivery_robot_security</url>
+  
+  <author>배달로봇팀</author>
+  
+  <buildtool_depend>ament_python</buildtool_depend>
+  
+  <!-- Python Dependencies -->
+  <depend>rclpy</depend>
+  <depend>std_msgs</depend>
+  <depend>sensor_msgs</depend>
+  <depend>geometry_msgs</depend>
+  <depend>control_msgs</depend>
+  <depend>cv_bridge</depend>
+  
+  <!-- QR Code Dependencies -->
+  <depend>zbar_ros</depend>
+  
+  <!-- Control Dependencies -->
+  <depend>controller_manager</depend>
+  <depend>ros2_control</depend>
+  
+  <!-- Launch Dependencies -->
+  <exec_depend>launch</exec_depend>
+  <exec_depend>launch_ros</exec_depend>
+  
+  <!-- Test Dependencies -->
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+  <test_depend>ament_copyright</test_depend>
+  <test_depend>ament_flake8</test_depend>
+  <test_depend>ament_pep257</test_depend>
+  <test_depend>python3-pytest</test_depend>
+  
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
+</package>

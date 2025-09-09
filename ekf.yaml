@@ -1,0 +1,212 @@
+# Robot Localization EKF Configuration for Delivery Robot
+# 배달 로봇을 위한 robot_localization 패키지 EKF 설정
+# Dual EKF 구성: 지역 EKF + 전역 EKF
+
+### EKF Local Node Configuration (odom → base_link)
+# 바퀴 엔코더와 IMU 데이터를 융합하여 부드러운 지역 움직임 추정
+ekf_filter_node_odom:
+  ros__parameters:
+    # 기본 설정
+    frequency: 30.0
+    sensor_timeout: 0.1
+    two_d_mode: true
+    transform_time_offset: 0.0
+    transform_timeout: 0.0
+    print_diagnostics: true
+    debug: false
+    permit_corrected_publication: false
+    publish_acceleration: false
+    publish_tf: true
+    
+    # 프레임 설정
+    map_frame: map              # 사용하지 않음 (지역 EKF)
+    odom_frame: odom           # 부모 프레임
+    base_link_frame: base_link # 자식 프레임  
+    world_frame: odom          # 월드 프레임 (중요: odom으로 설정)
+    
+    # 바퀴 엔코더 데이터 (odom0)
+    odom0: /wheel_encoder/odom
+    odom0_config: [false, false, false,    # x, y, z 위치 (사용안함)
+                   false, false, false,    # roll, pitch, yaw (사용안함) 
+                   true,  true,  false,    # x_dot, y_dot, z_dot 속도 (x,y 사용)
+                   false, false, true,     # roll_dot, pitch_dot, yaw_dot (yaw 사용)
+                   false, false, false]    # x_ddot, y_ddot, z_ddot 가속도 (사용안함)
+    odom0_queue_size: 2
+    odom0_nodelay: false
+    odom0_differential: false
+    odom0_relative: false
+    odom0_pose_rejection_threshold: 5.0
+    odom0_twist_rejection_threshold: 1.0
+    
+    # IMU 데이터 (imu0)
+    imu0: /imu/data
+    imu0_config: [false, false, false,     # x, y, z 위치 (사용안함)
+                  true,  true,  false,     # roll, pitch, yaw (roll, pitch 사용)
+                  false, false, false,     # x_dot, y_dot, z_dot 속도 (사용안함)
+                  true,  true,  true,      # roll_dot, pitch_dot, yaw_dot 각속도 (모두 사용)
+                  true,  true,  false]     # x_ddot, y_ddot, z_ddot 가속도 (x, y 사용)
+    imu0_nodelay: false
+    imu0_differential: false
+    imu0_relative: true
+    imu0_queue_size: 5
+    imu0_pose_rejection_threshold: 0.8
+    imu0_twist_rejection_threshold: 0.8
+    imu0_linear_acceleration_rejection_threshold: 0.8
+    imu0_remove_gravitational_acceleration: true
+    
+    # 프로세스 노이즈 공분산 행렬 (15x15)
+    process_noise_covariance: [0.05, 0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
+                              0,    0.05, 0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
+                              0,    0,    0.06, 0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
+                              0,    0,    0,    0.03, 0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
+                              0,    0,    0,    0,    0.03, 0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
+                              0,    0,    0,    0,    0,    0.06, 0,     0,     0,    0,    0,    0,    0,    0,    0,
+                              0,    0,    0,    0,    0,    0,    0.025, 0,     0,    0,    0,    0,    0,    0,    0,
+                              0,    0,    0,    0,    0,    0,    0,     0.025, 0,    0,    0,    0,    0,    0,    0,
+                              0,    0,    0,    0,    0,    0,    0,     0,     0.04, 0,    0,    0,    0,    0,    0,
+                              0,    0,    0,    0,    0,    0,    0,     0,     0,    0.01, 0,    0,    0,    0,    0,
+                              0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0.01, 0,    0,    0,    0,
+                              0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0.02, 0,    0,    0,
+                              0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0.01, 0,    0,
+                              0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0.01, 0,
+                              0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0.015]
+    
+    # 초기 추정 공분산 행렬
+    initial_estimate_covariance: [1e-9, 0,    0,    0,    0,    0,    0,    0,    0,    0,     0,     0,     0,    0,    0,
+                                 0,    1e-9, 0,    0,    0,    0,    0,    0,    0,    0,     0,     0,     0,    0,    0,
+                                 0,    0,    1e-9, 0,    0,    0,    0,    0,    0,    0,     0,     0,     0,    0,    0,
+                                 0,    0,    0,    1e-9, 0,    0,    0,    0,    0,    0,     0,     0,     0,    0,    0,
+                                 0,    0,    0,    0,    1e-9, 0,    0,    0,    0,    0,     0,     0,     0,    0,    0,
+                                 0,    0,    0,    0,    0,    1e-9, 0,    0,    0,    0,     0,     0,     0,    0,    0,
+                                 0,    0,    0,    0,    0,    0,    1e-9, 0,    0,    0,     0,     0,     0,    0,    0,
+                                 0,    0,    0,    0,    0,    0,    0,    1e-9, 0,    0,     0,     0,     0,    0,    0,
+                                 0,    0,    0,    0,    0,    0,    0,    0,    1e-9, 0,     0,     0,     0,    0,    0,
+                                 0,    0,    0,    0,    0,    0,    0,    0,    0,    1e-9,  0,     0,     0,    0,    0,
+                                 0,    0,    0,    0,    0,    0,    0,    0,    0,    0,     1e-9,  0,     0,    0,    0,
+                                 0,    0,    0,    0,    0,    0,    0,    0,    0,    0,     0,     1e-9,  0,    0,    0,
+                                 0,    0,    0,    0,    0,    0,    0,    0,    0,    0,     0,     0,     1e-9, 0,    0,
+                                 0,    0,    0,    0,    0,    0,    0,    0,    0,    0,     0,     0,     0,    1e-9, 0,
+                                 0,    0,    0,    0,    0,    0,    0,    0,    0,    0,     0,     0,     0,    0,    1e-9]
+
+### EKF Global Node Configuration (map → odom)  
+# 지역 EKF 출력과 GPS 데이터를 융합하여 전역 위치 추정
+ekf_filter_node_map:
+  ros__parameters:
+    # 기본 설정
+    frequency: 30.0
+    sensor_timeout: 0.1
+    two_d_mode: true
+    transform_time_offset: 0.0
+    transform_timeout: 0.0
+    print_diagnostics: true
+    debug: false
+    permit_corrected_publication: false
+    publish_acceleration: false
+    publish_tf: true
+    
+    # 프레임 설정
+    map_frame: map              # 부모 프레임
+    odom_frame: odom           # 자식 프레임
+    base_link_frame: base_link # 베이스 프레임
+    world_frame: map           # 월드 프레임 (중요: map으로 설정)
+    
+    # 바퀴 엔코더 데이터 (odom0) - 지역 EKF와 동일
+    odom0: /wheel_encoder/odom  
+    odom0_config: [false, false, false,    # x, y, z 위치 (사용안함)
+                   false, false, false,    # roll, pitch, yaw (사용안함)
+                   true,  true,  false,    # x_dot, y_dot, z_dot 속도 (x, y 사용)
+                   false, false, true,     # roll_dot, pitch_dot, yaw_dot (yaw 사용)
+                   false, false, false]    # x_ddot, y_ddot, z_ddot 가속도 (사용안함)
+    odom0_queue_size: 2
+    odom0_nodelay: false
+    odom0_differential: false
+    odom0_relative: false
+    odom0_pose_rejection_threshold: 5.0
+    odom0_twist_rejection_threshold: 1.0
+    
+    # IMU 데이터 (imu0) - yaw만 사용 (GPS가 위치를 제공하므로)
+    imu0: /imu/data
+    imu0_config: [false, false, false,     # x, y, z 위치 (사용안함)
+                  true,  true,  true,      # roll, pitch, yaw (모두 사용)
+                  false, false, false,     # x_dot, y_dot, z_dot 속도 (사용안함)
+                  false, false, false,     # roll_dot, pitch_dot, yaw_dot (사용안함)
+                  false, false, false]     # x_ddot, y_ddot, z_ddot 가속도 (사용안함)
+    imu0_nodelay: false
+    imu0_differential: false
+    imu0_relative: true
+    imu0_queue_size: 5
+    imu0_pose_rejection_threshold: 0.8
+    imu0_twist_rejection_threshold: 0.8
+    imu0_linear_acceleration_rejection_threshold: 0.8
+    imu0_remove_gravitational_acceleration: true
+    
+    # GPS 변환 데이터 (odom1) - navsat_transform_node에서 제공
+    odom1: /odometry/gps
+    odom1_config: [true,  true,  false,    # x, y, z 위치 (x, y 사용)
+                   false, false, false,    # roll, pitch, yaw (사용안함)
+                   false, false, false,    # x_dot, y_dot, z_dot 속도 (사용안함)
+                   false, false, false,    # roll_dot, pitch_dot, yaw_dot (사용안함)
+                   false, false, false]    # x_ddot, y_ddot, z_ddot 가속도 (사용안함)
+    odom1_queue_size: 2
+    odom1_nodelay: false
+    odom1_differential: false
+    odom1_relative: false
+    odom1_pose_rejection_threshold: 2.0   # GPS 정확도에 따라 조정
+    odom1_twist_rejection_threshold: 1.0
+    
+    # 프로세스 노이즈 공분산 행렬 (GPS 사용 시 위치 노이즈 증가)
+    process_noise_covariance: [0.05, 0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
+                              0,    0.05, 0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
+                              0,    0,    0.06, 0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
+                              0,    0,    0,    0.03, 0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
+                              0,    0,    0,    0,    0.03, 0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
+                              0,    0,    0,    0,    0,    0.06, 0,     0,     0,    0,    0,    0,    0,    0,    0,
+                              0,    0,    0,    0,    0,    0,    0.025, 0,     0,    0,    0,    0,    0,    0,    0,
+                              0,    0,    0,    0,    0,    0,    0,     0.025, 0,    0,    0,    0,    0,    0,    0,
+                              0,    0,    0,    0,    0,    0,    0,     0,     0.04, 0,    0,    0,    0,    0,    0,
+                              0,    0,    0,    0,    0,    0,    0,     0,     0,    0.01, 0,    0,    0,    0,    0,
+                              0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0.01, 0,    0,    0,    0,
+                              0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0.02, 0,    0,    0,
+                              0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0.01, 0,    0,
+                              0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0.01, 0,
+                              0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0.015]
+    
+    # 초기 추정 공분산 행렬
+    initial_estimate_covariance: [1e-9, 0,    0,    0,    0,    0,    0,    0,    0,    0,     0,     0,     0,    0,    0,
+                                 0,    1e-9, 0,    0,    0,    0,    0,    0,    0,    0,     0,     0,     0,    0,    0,
+                                 0,    0,    1e-9, 0,    0,    0,    0,    0,    0,    0,     0,     0,     0,    0,    0,
+                                 0,    0,    0,    1e-9, 0,    0,    0,    0,    0,    0,     0,     0,     0,    0,    0,
+                                 0,    0,    0,    0,    1e-9, 0,    0,    0,    0,    0,     0,     0,     0,    0,    0,
+                                 0,    0,    0,    0,    0,    1e-9, 0,    0,    0,    0,     0,     0,     0,    0,    0,
+                                 0,    0,    0,    0,    0,    0,    1e-9, 0,    0,    0,     0,     0,     0,    0,    0,
+                                 0,    0,    0,    0,    0,    0,    0,    1e-9, 0,    0,     0,     0,     0,    0,    0,
+                                 0,    0,    0,    0,    0,    0,    0,    0,    1e-9, 0,     0,     0,     0,    0,    0,
+                                 0,    0,    0,    0,    0,    0,    0,    0,    0,    1e-9,  0,     0,     0,    0,    0,
+                                 0,    0,    0,    0,    0,    0,    0,    0,    0,    0,     1e-9,  0,     0,    0,    0,
+                                 0,    0,    0,    0,    0,    0,    0,    0,    0,    0,     0,     1e-9,  0,    0,    0,
+                                 0,    0,    0,    0,    0,    0,    0,    0,    0,    0,     0,     0,     1e-9, 0,    0,
+                                 0,    0,    0,    0,    0,    0,    0,    0,    0,    0,     0,     0,     0,    1e-9, 0,
+                                 0,    0,    0,    0,    0,    0,    0,    0,    0,    0,     0,     0,     0,    0,    1e-9]
+
+### NavSat Transform Node Configuration
+# GPS 좌표를 map 프레임의 cartesian 좌표로 변환
+navsat_transform:
+  ros__parameters:
+    # 기본 설정
+    frequency: 30.0
+    delay: 3.0                      # GPS 초기 수렴 지연 시간
+    magnetic_declination_radians: 0.0523599  # 서울 지역 자기편각 (약 3도)
+    yaw_offset: 0.0                # yaw 오프셋
+    zero_altitude: true            # 고도를 0으로 설정 (2D 모드)
+    broadcast_utm_transform: false  # UTM 변환 브로드캐스트하지 않음
+    broadcast_utm_transform_as_parent_frame: false
+    publish_filtered_gps: true     # 필터링된 GPS 좌표 발행
+    use_odometry_yaw: false        # odometry에서 yaw 사용하지 않음
+    use_manual_datum: false        # 수동 datum 설정하지 않음
+    wait_for_datum: false          # datum 대기하지 않음
+    
+    # 토픽 이름 (기본값 사용 시 주석 처리 가능)
+    # gps_topic: "/gps/fix"
+    # imu_topic: "/imu/data" 
+    # odometry_topic: "/odometry/filtered/local"
+    # output_topic: "/odometry/gps"
