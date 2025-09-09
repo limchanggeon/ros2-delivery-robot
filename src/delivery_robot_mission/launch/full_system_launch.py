@@ -59,11 +59,7 @@ def generate_launch_description():
     
     declare_rviz_config = DeclareLaunchArgument(
         'rviz_config',
-        default_value=PathJoinSubstitution([
-            FindPackageShare('delivery_robot_navigation'),
-            'rviz',
-            'delivery_robot_nav.rviz'
-        ]),
+        default_value='',  # RViz 기본 설정 사용
         description='RViz 설정 파일 경로'
     )
     
@@ -179,25 +175,24 @@ def generate_launch_description():
         )
     ])
     
-    # 7. 하드웨어 인터페이스 (ros2_control)
-    control_group = GroupAction([
-        IncludeLaunchDescription(
-            PythonLaunchDescriptionSource([
-                FindPackageShare('delivery_robot_control'),
-                '/launch/control.launch.py'
-            ]),
-            launch_arguments={
-                'use_sim_time': use_sim_time,
-            }.items()
-        )
-    ])
+    # 7. 하드웨어 인터페이스 (ros2_control) - 선택적 실행
+    # control_group = GroupAction([
+    #     IncludeLaunchDescription(
+    #         PythonLaunchDescriptionSource([
+    #             FindPackageShare('delivery_robot_control'),
+    #             '/launch/control.launch.py'
+    #         ]),
+    #         launch_arguments={
+    #             'use_sim_time': use_sim_time,
+    #         }.items()
+    #     )
+    # ])
     
-    # 8. RViz 시각화
+    # 8. RViz 시각화 (기본 설정 사용)
     rviz_node = Node(
         package='rviz2',
         executable='rviz2',
         name='rviz2',
-        arguments=['-d', rviz_config],
         parameters=[{'use_sim_time': use_sim_time}],
         output='screen',
         condition=IfCondition(use_rviz)
@@ -228,7 +223,7 @@ def generate_launch_description():
         
         # 시스템 구성 요소들 (순서 중요)
         robot_description_group,      # 1. 로봇 모델
-        control_group,               # 2. 하드웨어 제어
+        # control_group,               # 2. 하드웨어 제어 (선택적)
         localization_group,          # 3. 위치 추정
         navigation_group,            # 4. 내비게이션
         perception_group,            # 5. 인식

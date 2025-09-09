@@ -20,8 +20,8 @@ fi
 echo "✅ ROS 2 $ROS_DISTRO 환경 감지됨"
 
 # 작업공간 확인
-if [ ! -f "src/CMakeLists.txt" ] && [ ! -d "src/delivery_robot_description" ]; then
-    echo "❌ ROS 2 작업공간이 아닙니다. ros2_ws 디렉토리에서 실행하세요."
+if [ ! -d "src/delivery_robot_description" ]; then
+    echo "❌ ROS 2 작업공간이 아닙니다. capston_project 디렉토리에서 실행하세요."
     exit 1
 fi
 
@@ -54,18 +54,8 @@ sudo apt install -y \
 
 # Python 의존성 설치
 echo "🐍 Python 의존성 설치 중..."
-pip3 install --user \
-    ultralytics \
-    torch \
-    torchvision \
-    opencv-python \
-    numpy \
-    requests \
-    geopy \
-    pyserial \
-    cryptography \
-    qrcode \
-    pyzbar
+chmod +x install_python_deps.sh
+./install_python_deps.sh
 
 # YOLOv8 모델 다운로드
 echo "🤖 YOLOv8 모델 다운로드 중..."
