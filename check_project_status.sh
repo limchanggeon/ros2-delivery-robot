@@ -55,7 +55,36 @@ for file in "${config_files[@]}"; do
     fi
 done
 
-# 4. Python 의존성 확인
+# 4. ROS 2 노드 실행 파일 확인 (빌드 후에만 가능)
+echo ""
+echo "🔧 ROS 2 노드 실행 파일 확인..."
+if [ -f "install/setup.bash" ]; then
+    echo "빌드 결과 발견 - 노드 확인 중..."
+    source install/setup.bash
+    
+    # 주요 노드들 확인
+    nodes=(
+        "delivery_robot_perception yolo_inference_node"
+        "delivery_robot_perception camera_driver_node"
+        "delivery_robot_mission mission_control_node"
+        "delivery_robot_mission system_monitor_node"
+        "delivery_robot_security authentication_node"
+    )
+    
+    for node_info in "${nodes[@]}"; do
+        pkg=$(echo $node_info | cut -d' ' -f1)
+        node=$(echo $node_info | cut -d' ' -f2)
+        if ros2 pkg executables $pkg 2>/dev/null | grep -q $node; then
+            echo "  ✅ $pkg $node"
+        else
+            echo "  ❌ $pkg $node (빌드 후 사용 가능)"
+        fi
+    done
+else
+    echo "⚠️ 빌드 결과 없음 - 먼저 colcon build 실행 필요"
+fi
+
+# 5. Python 의존성 확인
 echo ""
 echo "🐍 Python 의존성 확인:"
 python3 -c "
@@ -89,7 +118,7 @@ else:
     print('\n✅ 모든 Python 의존성이 설치되어 있습니다!')
 "
 
-# 5. Git 상태 확인
+# 6. Git 상태 확인
 echo ""
 echo "📝 Git 상태:"
 if [ -d ".git" ]; then
@@ -106,7 +135,7 @@ else
     echo "  ❌ Git 저장소가 초기화되지 않음"
 fi
 
-# 6. 디스크 사용량 확인
+# 7. 디스크 사용량 확인
 echo ""
 echo "💾 디스크 사용량:"
 total_size=$(du -sh . | cut -f1)
@@ -119,10 +148,12 @@ echo "========================================="
 echo "✨ 상태 점검 완료!"
 echo "========================================="
 
-# 7. 다음 단계 안내
+# 8. 다음 단계 안내
 echo ""
 echo "🚀 다음 단계:"
-echo "1. Python 의존성 설치: ./install_python_deps.sh"
-echo "2. 프로젝트 빌드 (Linux): ./build_and_run.sh"
-echo "3. 프로젝트 빌드 (macOS): ./build_and_run_macos.sh"
-echo "4. Git 커밋 및 푸시: git add -A && git commit -m 'Update' && git push"
+echo "1. 모델 확인: models/yolov8_best.pt 파일 존재 확인"
+echo "2. Python 의존성 설치: ./install_python_deps.sh"
+echo "3. 프로젝트 빌드 (젯슨): ./build_and_run_jetson.sh"
+echo "4. 프로젝트 빌드 (Linux): ./build_and_run.sh"
+echo "5. 프로젝트 빌드 (macOS): ./build_and_run_macos.sh"
+echo "6. Git 커밋 및 푸시: git add -A && git commit -m 'Update' && git push"
