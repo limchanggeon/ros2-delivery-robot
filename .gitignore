@@ -155,9 +155,17 @@ Thumbs.db
 # *.h5
 # *.pb
 
-# Temporary files
+# Temporary and backup files
 *.tmp
 *.temp
+*_OLD.md
+*_BACKUP.md
+*.bak
+
+# Development and debugging files
+debug_*
+temp_*
+test_output/
 
 # Gazebo
 .gazebo/
@@ -165,3 +173,16 @@ Thumbs.db
 # Robot specific
 *.bag
 *.bag.*
+
+# Database files (keep structure, ignore data)
+robot_control.db
+*.sqlite
+*.sqlite3
+
+# Log files
+logs/
+*.log
+
+# Integrated Control System specific
+Integrated\ Control\ System/logs/
+Integrated\ Control\ System/robot_control.db
