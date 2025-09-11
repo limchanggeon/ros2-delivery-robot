@@ -1,24 +1,51 @@
-# ROS 2 자율주행 배송 로봇 시스템
+# ROS 2 자율주행 배송 로봇 시스템 + NARCHON 통합 관제 시스템
 
-이 프로젝트는 ROS 2 Humble을 기반으로 한 완전 자율주행 배송 로봇 시스템입니다. YOLOv8 객체 인식, GPS/IMU 기반 위치 추정, QR 코드 인증, Nav2 네비게이션을 통합한 포괄적인 배송 솔루션을 제공합니다.
+이 프로젝트는 ROS 2 Humble을 기반으로 한 완전 자율주행 배송 로봇 시스템에 **NARCHON 통합 관제 시스템**을 결합한 완전한 로봇 플릿 관리 솔루션입니다.
+
+## 🎯 통합 시스템 개요
+
+### 🤖 ROS2 배송 로봇 (기존)
+- YOLOv8 객체 인식, GPS/IMU 기반 위치 추정, QR 코드 인증, Nav2 네비게이션
+
+### 🎮 NARCHON 통합 관제 시스템 (신규)
+- 웹 기반 실시간 모니터링 대시보드
+- 다중 로봇 플릿 관리
+- 실시간 텔레메트리 및 비디오 스트리밍
+- 미션 관리 및 원격 제어
 
 ## 📋 주요 기능
 
+### 🚀 로봇 시스템 기능
 - **🤖 자율 주행**: Nav2 기반 경로 계획 및 장애물 회피
 - **👁️ 객체 인식**: YOLOv8을 활용한 실시간 객체 탐지
 - **📍 정밀 위치 추정**: GPS + IMU 센서 융합 (EKF)
 - **🔒 보안 인증**: QR 코드 기반 배송 인증 시스템
 - **🗺️ 지도 API 연동**: Kakao Map API를 통한 경로 생성
-- **📊 시스템 모니터링**: 실시간 상태 감시 및 로그
 
-## 🏗️ 프로젝트 구조
+### 🎮 관제 시스템 기능
+- **📊 실시간 모니터링**: 배터리, CPU, 메모리, 위치, 속도 등
+- **🗺️ 2D 맵 시각화**: Leaflet.js 기반 로봇 위치 추적
+- **📹 비디오 스트리밍**: WebRTC 기반 실시간 카메라 피드
+- **🎯 미션 관리**: 복잡한 워크플로우 생성 및 실행
+- **🌐 웹 대시보드**: 반응형 웹 인터페이스
+
+## 🏗️ 통합 프로젝트 구조
 
 ```
 capston_project/
-├── 📁 models/                           # YOLOv8 모델 파일
-│   ├── yolov8_best.pt                  # 훈련된 YOLOv8 모델
-│   └── README.md                       # 모델 정보
-├── 📁 src/                             # ROS 2 패키지들
+├── 📁 Integrated Control System/       # 🆕 NARCHON 통합 관제 시스템
+│   ├── FastAPI.py                      # 백엔드 API 서버
+│   ├── frontend/                       # 웹 대시보드
+│   ├── status_publisher_node.py        # 로봇 상태 수집 노드
+│   ├── web_bridge_node.py             # ROS2-웹 브리지
+│   ├── launch/                         # 통합 런치 파일
+│   ├── lanch.py                        # 시스템 런처
+│   ├── start_system.sh                 # 빠른 시작 스크립트
+│   └── README.md                       # 상세 문서
+├── 📁 models/                          # YOLOv8 모델 파일
+│   ├── yolov8_best.pt                 # 훈련된 YOLOv8 모델
+│   └── README.md                      # 모델 정보
+├── 📁 src/                            # ROS 2 패키지들
 │   ├── delivery_robot_description/     # 로봇 모델 정의 (URDF)
 │   │   ├── urdf/
 │   │   │   ├── delivery_robot.urdf.xacro

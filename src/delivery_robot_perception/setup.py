@@ -41,6 +41,9 @@ setup(
             'yolo_inference_node = delivery_robot_perception.yolo_inference_node:main',
             # 카메라 드라이버 노드  
             'camera_driver_node = delivery_robot_perception.camera_driver_node:main',
+            # NARCHON 통합 관제 시스템 노드들
+            'status_publisher_node = delivery_robot_perception.status_publisher_node:main',
+            'web_bridge_node = delivery_robot_perception.web_bridge_node:main',
         ],
     },
     classifiers=[

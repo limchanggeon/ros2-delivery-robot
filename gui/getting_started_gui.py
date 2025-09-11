@@ -17,6 +17,8 @@ import os
 import sys
 import threading
 import subprocess
+import shutil
+import platform
 import tkinter as tk
 from tkinter import ttk, messagebox, filedialog
 
@@ -72,6 +74,8 @@ class App(tk.Tk):
 
         self.workdir = tk.StringVar(value=DEFAULT_WORKDIR)
         self.use_rviz = tk.BooleanVar(value=False)
+        # Auto-source ROS environment before running ros2/colcon commands
+        self.auto_source_ros = tk.BooleanVar(value=True)
 
         self._make_widgets()
         self.current_runner = None
@@ -87,6 +91,18 @@ class App(tk.Tk):
         frm_buttons = ttk.Frame(self)
         frm_buttons.pack(fill='x', padx=8, pady=6)
 
+        # Compatibility/status hint
+        status = []
+        if platform.system() != 'Linux':
+            status.append('Non-Linux: some scripts expect Linux (Jetson)')
+        if not shutil.which('xdg-open'):
+            status.append('xdg-open not found: README open will fall back to cat')
+        if 'DISPLAY' not in os.environ:
+            status.append('No DISPLAY: GUI requires X (use X forwarding or VNC)')
+        if status:
+            lbl = ttk.Label(self, text='; '.join(status), foreground='orange')
+            lbl.pack(fill='x', padx=8)
+
         # Row 1
         ttk.Button(frm_buttons, text='Check System', command=self._check_system).grid(row=0, column=0, padx=4, pady=4)
         ttk.Button(frm_buttons, text='Install Python Deps', command=self._install_deps).grid(row=0, column=1, padx=4, pady=4)
@@ -96,10 +112,11 @@ class App(tk.Tk):
 
         # Row 2
         ttk.Checkbutton(frm_buttons, text='use_rviz', variable=self.use_rviz).grid(row=1, column=0, padx=4, pady=4)
-        ttk.Button(frm_buttons, text='Launch Full System', command=self._launch_full_system).grid(row=1, column=1, padx=4, pady=4)
-        ttk.Button(frm_buttons, text='Run system_monitor_node', command=self._run_system_monitor).grid(row=1, column=2, padx=4, pady=4)
-        ttk.Button(frm_buttons, text='Open README', command=self._open_readme).grid(row=1, column=3, padx=4, pady=4)
-        ttk.Button(frm_buttons, text='Stop Current', command=self._stop_current).grid(row=1, column=4, padx=4, pady=4)
+        ttk.Checkbutton(frm_buttons, text='Auto-source ROS', variable=self.auto_source_ros).grid(row=1, column=1, padx=4, pady=4)
+        ttk.Button(frm_buttons, text='Launch Full System', command=self._launch_full_system).grid(row=1, column=2, padx=4, pady=4)
+        ttk.Button(frm_buttons, text='Run system_monitor_node', command=self._run_system_monitor).grid(row=1, column=3, padx=4, pady=4)
+        ttk.Button(frm_buttons, text='Open README', command=self._open_readme).grid(row=1, column=4, padx=4, pady=4)
+        ttk.Button(frm_buttons, text='Stop Current', command=self._stop_current).grid(row=1, column=5, padx=4, pady=4)
 
         # Output
         frm_out = ttk.Frame(self)
@@ -129,7 +146,14 @@ class App(tk.Tk):
         if self.current_runner and self.current_runner.is_alive():
             messagebox.showwarning('Busy', 'A command is already running. Stop it first.')
             return
-        self.current_runner = Runner(cmd, self.workdir.get(), self._append)
+        # Optionally auto-source ROS environment (useful when GUI started without ROS sourced)
+        prefix = ''
+        if self.auto_source_ros.get() and not os.environ.get('ROS_DISTRO'):
+            # Default to Foxy on Jetson per project docs; user can disable auto-source
+            prefix = 'source /opt/ros/foxy/setup.bash && '
+
+        full_cmd = prefix + cmd
+        self.current_runner = Runner(full_cmd, self.workdir.get(), self._append)
         self.current_runner.start()
 
     # Actions
@@ -162,10 +186,18 @@ class App(tk.Tk):
         path = os.path.join(self.workdir.get(), 'GETTING_STARTED_JETSON.md')
         if os.path.isfile(path):
             # open with default pager (xdg-open) or just display
-            try:
-                subprocess.Popen(['xdg-open', path])
-            except Exception:
-                self._run_command(f'bat "{path}" || cat "{path}"', confirm=False)
+            xdg = shutil.which('xdg-open')
+            if xdg:
+                try:
+                    subprocess.Popen([xdg, path])
+                    return
+                except Exception:
+                    pass
+            # fallback: use bat if available, otherwise cat
+            if shutil.which('bat'):
+                self._run_command(f'bat "{path}"', confirm=False)
+            else:
+                self._run_command(f'cat "{path}"', confirm=False)
         else:
             messagebox.showinfo('Not found', f'{path} does not exist')
 
