@@ -1,0 +1,94 @@
+# 전역 EKF 설정 (map -> odom 변환 생성)
+# 지역 EKF 출력과 GPS 데이터를 융합하여
+# 전역적으로 정확하고 드리프트 없는 위치 추정 제공
+
+ekf_filter_node:
+  ros__parameters:
+    # 필터 주파수 (Hz) - GPS 업데이트 주기를 고려한 중간 주파수
+    frequency: 10.0
+    
+    # 2차원 평면 모드
+    two_d_mode: true
+    
+    # 좌표계 정의 - 전역 EKF는 map 프레임에서 작동
+    map_frame: map
+    odom_frame: odom
+    base_link_frame: base_link
+    world_frame: map
+    
+    # 변환 발행 설정
+    publish_tf: true
+    publish_acceleration: false
+    
+    # 센서 입력 설정
+    
+    # 지역 오도메트리 (지역 EKF의 출력)
+    odom0: /odometry/local
+    odom0_config: [true,  true,  false,   # X, Y, Z 위치
+                   false, false, true,    # Roll, Pitch, Yaw
+                   true,  true,  false,   # X속도, Y속도, Z속도
+                   false, false, true,    # Roll각속도, Pitch각속도, Yaw각속도
+                   false, false, false]   # X가속도, Y가속도, Z가속도
+    odom0_differential: false
+    odom0_relative: false
+    odom0_queue_size: 10
+    odom0_nodelay: true
+    
+    # GPS 기반 오도메트리 (navsat_transform_node의 출력)
+    odom1: /odometry/gps
+    odom1_config: [true,  true,  false,   # X, Y, Z 위치 (GPS에서 제공)
+                   false, false, false,   # Roll, Pitch, Yaw (GPS는 방위각 제공 안함)
+                   false, false, false,   # 속도 정보 사용 안함
+                   false, false, false,   # 각속도 정보 사용 안함
+                   false, false, false]   # 가속도 정보 사용 안함
+    odom1_differential: false
+    odom1_relative: false
+    odom1_queue_size: 10
+    odom1_nodelay: true
+    
+    # IMU (방위각 정보)
+    imu0: /imu/data
+    imu0_config: [false, false, false,    # X, Y, Z 위치
+                  false, false, true,     # Roll, Pitch, Yaw (절대 방위각)
+                  false, false, false,    # X속도, Y속도, Z속도
+                  false, false, false,    # 각속도는 지역 EKF에서만 사용
+                  false, false, false]    # X가속도, Y가속도, Z가속도
+    imu0_differential: false
+    imu0_relative: false
+    imu0_queue_size: 10
+    imu0_nodelay: true
+    imu0_remove_gravitational_acceleration: true
+    
+    # 프로세스 노이즈 공분산 - 전역 추정이므로 더 보수적
+    process_noise_covariance: [0.1, 0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
+                               0,   0.1,  0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
+                               0,   0,    0.06, 0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
+                               0,   0,    0,    0.03, 0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
+                               0,   0,    0,    0,    0.03, 0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
+                               0,   0,    0,    0,    0,    0.06, 0,     0,     0,    0,    0,    0,    0,    0,    0,
+                               0,   0,    0,    0,    0,    0,    0.025, 0,     0,    0,    0,    0,    0,    0,    0,
+                               0,   0,    0,    0,    0,    0,    0,     0.025, 0,    0,    0,    0,    0,    0,    0,
+                               0,   0,    0,    0,    0,    0,    0,     0,     0.04, 0,    0,    0,    0,    0,    0,
+                               0,   0,    0,    0,    0,    0,    0,     0,     0,    0.01, 0,    0,    0,    0,    0,
+                               0,   0,    0,    0,    0,    0,    0,     0,     0,    0,    0.01, 0,    0,    0,    0,
+                               0,   0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0.02, 0,    0,    0,
+                               0,   0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0.01, 0,    0,
+                               0,   0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0.01, 0,
+                               0,   0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0.015]
+    
+    # 초기 추정 공분산
+    initial_estimate_covariance: [1e-9, 0,    0,    0,    0,    0,    0,    0,    0,    0,     0,     0,     0,    0,    0,
+                                  0,    1e-9, 0,    0,    0,    0,    0,    0,    0,    0,     0,     0,     0,    0,    0,
+                                  0,    0,    1e-9, 0,    0,    0,    0,    0,    0,    0,     0,     0,     0,    0,    0,
+                                  0,    0,    0,    1e-9, 0,    0,    0,    0,    0,    0,     0,     0,     0,    0,    0,
+                                  0,    0,    0,    0,    1e-9, 0,    0,    0,    0,    0,     0,     0,     0,    0,    0,
+                                  0,    0,    0,    0,    0,    1e-9, 0,    0,    0,    0,     0,     0,     0,    0,    0,
+                                  0,    0,    0,    0,    0,    0,    1e-9, 0,    0,    0,     0,     0,     0,    0,    0,
+                                  0,    0,    0,    0,    0,    0,    0,    1e-9, 0,    0,     0,     0,     0,    0,    0,
+                                  0,    0,    0,    0,    0,    0,    0,    0,    1e-9, 0,     0,     0,     0,    0,    0,
+                                  0,    0,    0,    0,    0,    0,    0,    0,    0,    1e-9,  0,     0,     0,    0,    0,
+                                  0,    0,    0,    0,    0,    0,    0,    0,    0,    0,     1e-9,  0,     0,    0,    0,
+                                  0,    0,    0,    0,    0,    0,    0,    0,    0,    0,     0,     1e-9,  0,    0,    0,
+                                  0,    0,    0,    0,    0,    0,    0,    0,    0,    0,     0,     0,     1e-9, 0,    0,
+                                  0,    0,    0,    0,    0,    0,    0,    0,    0,    0,     0,     0,     0,    1e-9, 0,
+                                  0,    0,    0,    0,    0,    0,    0,    0,    0,    0,     0,     0,     0,    0,    1e-9]

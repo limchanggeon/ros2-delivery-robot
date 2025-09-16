@@ -1,0 +1,29 @@
+# GPS 지도 보정 노드 파라미터 설정
+
+gps_map_calibrator:
+  ros__parameters:
+    # 기본 토픽 이름
+    clicked_point_topic: "/clicked_point"
+    gps_fix_topic: "/gps/fix"
+    imu_topic: "/imu/data"
+    
+    # UTM 변환 설정
+    auto_detect_utm_zone: true
+    manual_utm_zone: 52  # 한국 지역 기본값 (auto_detect가 false일 때 사용)
+    
+    # 보정 검증 설정
+    max_reasonable_transform_distance: 100000.0  # 최대 허용 변환 거리 (미터)
+    min_gps_accuracy: 5.0  # 최소 GPS 정확도 요구사항 (미터)
+    
+    # 자동 저장 설정
+    auto_save_calibration: true
+    calibration_save_path: "~/.ros2_gps_calibration/map_calibration.yaml"
+    
+    # 디버그 설정
+    verbose_logging: true
+    publish_debug_markers: false
+    
+    # TF 설정
+    utm_frame_id: "utm"
+    map_frame_id: "map"
+    base_link_frame_id: "base_link"

@@ -74,6 +74,6 @@
 
 - **GitHub**: https://github.com/limchanggeon/ros2-delivery-robot  
 - **관제 시스템**: https://github.com/limchanggeon/Integrated-Control-System
-- **이메일**: limchanggeon@gmail.com
+- **이메일**: ckdrjs0101@mokwon.ac.kr
 
 *"미래의 배송은 자율주행 로봇과 함께 시작됩니다"*

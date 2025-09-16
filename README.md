@@ -1,4 +1,63 @@
-# 🚀 ROS2 자율주행 배송 로봇 + NARCHON 통합 관제 시스템
+# 🚀 ROS2## 📍 프로젝트 개요
+
+본 프로젝트는 **세 가지 핵심 시스템**을 통합한 완전한 배송 로봇 솔루션입니다:
+
+### 🤖 **ROS2 자율주행 배송 로봇** (기본 시스템)
+- YOLOv8 기반 실시간 객체 인식
+- GPS/IMU 센서 융합을 통한 정밀 위치 추정
+- Nav2 기반 자율 네비게이션 및 장애물 회피
+- QR 코드 기반 보안 인증 시스템
+- Kakao Map API 연동 경로 생성
+
+### 🎮 **NARCHON 통합 관제 시스템** (실시간 모니터링)
+- **실시간 웹 대시보드**: 직관적인 로봇 플릿 모니터링
+- **다중 로봇 관리**: 여러 로봇 동시 제어 및 상태 추적
+- **실시간 텔레메트리**: 배터리, 위치, 속도, 시스템 상태 모니터링
+- **2D 맵 시각화**: Leaflet.js 기반 실시간 로봇 위치 추적
+- **비디오 스트리밍**: WebRTC 지원 실시간 카메라 피드
+- **미션 관리**: 복잡한 배송 워크플로우 생성 및 실행
+- **원격 제어**: 웹 인터페이스를 통한 로봇 명령 전송
+
+### 🛰️ **GPS 지리 참조 자율주행 시스템** (🆕 신규 추가)
+- **정적 지도-GPS 정렬**: 항공사진/지도 이미지를 실제 GPS 좌표에 정확히 매핑
+- **이중 EKF 아키텍처**: 지역/전역 위치 추정으로 드리프트 없는 장거리 항법
+- **대화형 지도 보정**: RViz 클릭 한 번으로 지도-GPS 자동 정렬
+- **UTM 좌표계 지원**: 전세계 어느 지역에서나 정확한 측위
+- **센서 융합**: GPS + IMU + 휠 오도메트리 통합
+- **Nav2 호환성**: 표준 ROS2 항법 스택과 완벽 통합
+
+## 🗺️ GPS 기반 자율주행의 특별함
+
+### 🎯 GPS 시스템 핵심 아키텍처
+
+```
+🌍 실제 세계 (WGS84 GPS)
+        ↓ UTM 투영
+📐 UTM 좌표계 (미터 단위)
+        ↓ 지도 보정 (클릭 한 번!)
+🗺️ MAP 좌표계 (로컬 지도)
+        ↓ 센서 융합 (이중 EKF)
+🏃 ODOM → 🤖 BASE_LINK
+```
+
+### 기존 SLAM 대비 GPS 시스템의 장점
+
+| 특성 | 기존 SLAM | 🆕 GPS 지리 참조 시스템 |
+|------|-----------|-------------------|
+| **정확도** | 환경에 의존적 | 전역적으로 일관된 정확도 |
+| **범위** | 제한된 맵 크기 | 🌍 무제한 작업 영역 |
+| **초기화** | 복잡한 맵 빌딩 과정 | 🖱️ 기존 지도 + 클릭 한 번 |
+| **유지보수** | 맵 업데이트 필요 | 🔄 자동 GPS 드리프트 보정 |
+| **다중 로봇** | 맵 공유 복잡 | 📡 GPS 좌표로 자동 동기화 |
+| **장거리 이동** | 루프 클로저 문제 | ⚡ 드리프트 완전 제거 |
+
+### 💡 실제 사용 시나리오
+
+- **🌾 농업/조경**: 넓은 농장이나 공원에서 정확한 경로 추종 및 작업
+- **🏫 캠퍼스 배송**: 대학교/기업 캠퍼스의 정확한 건물별 배송 서비스
+- **📦 물류창고**: 실외 야드와 실내를 연결하는 하이브리드 작업 환경
+- **🚚 도시 배송**: 실제 도로망을 활용한 정밀 네비게이션 및 배송
+- **🚨 재해 대응**: 기존 인프라 손상 시에도 GPS 기반으로 안정적 작업ON 통합 관제 시스템
 
 > **완전한 로봇 플릿 관리 솔루션** - ROS2 기반 자율주행 배송 로봇에 실시간 웹 관제 시스템을 통합한 포괄적인 솔루션
 
@@ -65,6 +124,41 @@ ros2-delivery-robot/
 │   ├── 📈 check_status.sh              # 시스템 상태 모니터링
 │   ├── 🗃️ robot_control.db             # SQLite 데이터베이스
 │   └── 📖 README.md                    # 상세 사용 가이드
+├── 📁 config/                          # 🆕 GPS 및 시스템 설정 파일
+│   ├── 🛰️ ekf_local.yaml               # 지역 EKF 설정 (연속 센서 융합)
+│   ├── 🛰️ ekf_global.yaml              # 전역 EKF 설정 (GPS 융합)
+│   ├── 🛰️ navsat_transform.yaml        # GPS-ROS 좌표 변환 설정
+│   └── 🛰️ gps_calibration_params.yaml  # 지도 보정 노드 설정
+├── 📁 launch/                          # 🆕 시스템 런치 파일들
+│   ├── 🛰️ gps_autonomous_system.launch.py  # 완전한 GPS 자율주행 시스템
+│   └── 🛰️ gps_calibration_launch.py        # GPS 지도 보정 전용
+├── 📁 ros_map/                         # 🆕 GPS 지도 보정 시스템
+│   ├── 🛰️ map_ros.py                   # 대화형 GPS-지도 보정 노드
+│   ├── 📸 항공사진.jpg                  # 예시 항공사진 지도
+│   └── 📊 지도메타데이터.xml            # 지리참조 메타데이터
+├── 📁 scripts/                         # 실행 및 유틸리티 스크립트
+│   ├── 🛰️ quick_start_gps_system.sh    # GPS 시스템 빠른 시작 스크립트
+│   ├── build_and_run.sh                # 통합 빌드 및 실행
+│   ├── build_and_run_jetson.sh         # Jetson 최적화 빌드
+│   ├── test_system.sh                  # 시스템 테스트
+│   ├── install_python_deps.sh          # Python 의존성 설치
+│   └── debug_nodes_jetson.sh           # Jetson 노드 디버깅
+├── 📁 docs/                            # 문서 및 가이드
+│   ├── 🛰️ GPS_AUTONOMOUS_GUIDE.md      # GPS 자율주행 완전 가이드 (🆕)
+│   ├── JETSON_GUIDE.md                 # Jetson 플랫폼 상세 가이드
+│   └── GETTING_STARTED_JETSON.md       # Jetson 빠른 시작
+├── 📁 src/                             # ROS2 패키지들
+│   ├── 📁 delivery_robot_description/  # 로봇 모델 정의 (URDF)
+│   ├── 📁 delivery_robot_control/      # 하드웨어 제어 인터페이스
+│   ├── 📁 delivery_robot_navigation/   # 자율 네비게이션 (Nav2)
+│   ├── 📁 delivery_robot_perception/   # 인식 시스템 (YOLOv8)
+│   ├── 📁 delivery_robot_mission/      # 미션 관리 및 실행
+│   └── 📁 delivery_robot_security/     # 보안 및 인증 (QR)
+├── 📁 models/                          # AI 모델 파일
+│   ├── yolov8_best.pt                  # 훈련된 YOLOv8 모델
+│   └── README.md                       # 모델 상세 정보
+└── 📋 PROJECT_SUMMARY.md               # 프로젝트 개요 및 요약
+```
 ├── 📁 src/                             # ROS2 패키지들
 │   ├── 📁 delivery_robot_description/  # 로봇 모델 정의 (URDF)
 │   ├── 📁 delivery_robot_control/      # 하드웨어 제어 인터페이스
@@ -172,7 +266,74 @@ ros2-delivery-robot/
 - **Kakao Map API**: 경로 생성 및 최적화
 - **시스템 모니터링**: 성능 및 상태 추적
 
-## 🚀 설치 및 실행 가이드
+## 🚀 빠른 시작 가이드
+
+### 🛰️ GPS 기반 자율주행 시스템 (🆕 추천)
+
+완전히 새로운 GPS 지리 참조 시스템으로 정확하고 확장성 있는 자율주행을 경험하세요!
+
+#### ⚡ 원클릭 시작
+
+```bash
+# 1. GPS 시스템 빠른 시작 (지도 파일 경로 포함)
+./scripts/quick_start_gps_system.sh /path/to/your/map.yaml
+
+# 2. 또는 단계별 실행
+# 2-1. 전체 GPS 자율주행 시스템 실행
+ros2 launch capston_project gps_autonomous_system.launch.py \
+    map_file:=/path/to/your/map.yaml
+
+# 2-2. GPS 지도 보정만 실행 (이미 시스템이 실행 중인 경우)
+ros2 launch capston_project gps_calibration_launch.py \
+    map_file:=/path/to/your/map.yaml
+```
+
+#### 🗺️ 지도 보정 (핵심 단계!)
+
+1. **RViz 설정**:
+   - Fixed Frame을 `map`으로 변경
+   - Map display 추가하여 지도 확인
+
+2. **GPS 보정 실행**:
+   - GPS 신호 수신 대기 (터미널에서 확인)
+   - RViz의 "Publish Point" 도구 선택 🖱️
+   - 지도 위에서 현재 로봇 위치 클릭
+
+3. **보정 완료 확인**:
+   ```
+   🎯 보정 지점 선택됨:
+      📍 지도 좌표: (x=45.123, y=23.456) [m]
+      🌍 GPS 좌표: (위도=37.123456°, 경도=126.987654°)
+   ✅ UTM -> MAP 정적 변환 발행 완료!
+   🎉 지도가 GPS 좌표에 성공적으로 정렬되었습니다!
+   ```
+
+#### 📋 필수 준비사항
+
+```bash
+# GPS 센서 토픽 확인
+ros2 topic echo /gps/fix        # GPS 데이터
+ros2 topic echo /imu/data       # IMU 데이터  
+ros2 topic echo /odom           # 휠 오도메트리
+
+# 필수 패키지 설치
+sudo apt install ros-$ROS_DISTRO-robot-localization \
+                 ros-$ROS_DISTRO-nav2-map-server \
+                 ros-$ROS_DISTRO-nav2-lifecycle-manager
+
+pip3 install pyproj pyyaml
+```
+
+#### 🎮 웹 대시보드 접속
+
+GPS 시스템과 함께 통합 관제 시스템도 자동으로 실행됩니다:
+- **메인 대시보드**: http://localhost:8000
+- **API 문서**: http://localhost:8000/docs
+- **GPS 정확도 실시간 모니터링**: 대시보드에서 확인
+
+---
+
+### 🎮 통합 관제 시스템 단독 실행
 
 ### 📋 사전 요구사항
 
@@ -790,15 +951,22 @@ pytest tests/
 
 ### 완료된 기능 ✅
 - [x] ROS2 기반 자율주행 시스템
-- [x] YOLOv8 객체 인식 통합
+- [x] YOLOv8 객체 인식 통합  
 - [x] 웹 기반 실시간 모니터링 대시보드
 - [x] 다중 로봇 플릿 관리
 - [x] WebSocket 실시간 통신
 - [x] SQLite 데이터베이스 통합
 - [x] 미션 관리 시스템
+- [x] 🆕 **GPS 지리 참조 자율주행 시스템**
+- [x] 🆕 **대화형 GPS-지도 보정 시스템**  
+- [x] 🆕 **이중 EKF 센서 융합 아키텍처**
+- [x] 🆕 **UTM 좌표계 지원 및 자동 변환**
 
 ### 개발 예정 기능 🚧
 - [ ] WebRTC 기반 실시간 비디오 스트리밍
+- [ ] 🛰️ **RTK-GPS 지원으로 cm급 정확도 달성**
+- [ ] 🛰️ **다중 GPS 안테나 융합 (헤딩 추정)**
+- [ ] 🛰️ **GPS 음영지역 대응 (UWB/LiDAR 백업)**
 - [ ] 음성 명령 인터페이스
 - [ ] AI 기반 경로 최적화
 - [ ] 클라우드 백엔드 연동
@@ -807,9 +975,16 @@ pytest tests/
 - [ ] Docker 컨테이너화
 - [ ] Kubernetes 배포 지원
 
+### GPS 시스템 장기 계획 🛰️
+- [ ] **자동 지도 업데이트**: 위성 이미지 API 연동으로 지도 자동 갱신
+- [ ] **글로벌 좌표계 지원**: WGS84, UTM, 지역 좌표계 자유 변환
+- [ ] **지형 인식 항법**: DEM(고도 모델) 통합으로 3D 경로 계획
+- [ ] **날씨 보정**: 기상 데이터 기반 GPS 정확도 향상
+- [ ] **인공위성 선택 최적화**: 다중 GNSS (GPS+GLONASS+Galileo+BeiDou)
+
 ### 장기 계획 🎯
 - [ ] 머신러닝 기반 예측 유지보수
-- [ ] 블록체인 기반 배송 추적
+- [ ] 블록체인 기반 배송 추적  
 - [ ] AR/VR 원격 조작 인터페이스
 - [ ] 5G 네트워크 최적화
 - [ ] 대규모 플릿 관리 (100+ 로봇)
